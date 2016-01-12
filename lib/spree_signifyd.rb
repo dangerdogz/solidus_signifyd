@@ -3,7 +3,7 @@ require 'signifyd'
 require 'spree_signifyd/create_signifyd_case'
 require 'spree_signifyd/engine'
 require 'spree_signifyd/request_verifier'
-require 'resque'
+require 'sidekiq'
 require 'devise'
 
 module SpreeSignifyd
@@ -27,7 +27,7 @@ module SpreeSignifyd
 
   def create_case(order_number:)
     Rails.logger.info "Queuing Signifyd case creation event: #{order_number}"
-    Resque.enqueue(SpreeSignifyd::CreateSignifydCase, order_number)
+    Sidekiq::Client.enqueue(SpreeSignifyd::CreateSignifydCase, order_number)
   end
 
   def score_above_threshold?(score)
