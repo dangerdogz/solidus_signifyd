@@ -2,11 +2,16 @@ module SpreeSignifyd::OrderConcerns
   extend ActiveSupport::Concern
 
   included do
-    Spree::Order.state_machine.after_transition to: :complete, unless: :approved? do |order, transition|
-      SpreeSignifyd.create_case(order_number: order.number)
-    end
+
+    insert_checkout_step :selection, :before => :address
+
+    self.state_machine.after_transition to: :complete, :do => :create_case, unless: :approved?
 
     has_one :signifyd_order_score, class_name: "SpreeSignifyd::OrderScore"
+
+    def create_case
+      SpreeSignifyd.create_case(order_number: self.number)
+    end
 
     prepend(InstanceMethods)
   end
