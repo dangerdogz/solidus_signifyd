@@ -27,6 +27,24 @@ module SpreeSignifyd
 
     end
 
+    describe ".set_case" do
+
+      let(:order) { FactoryGirl.create(:order) }
+
+      def set_case(case_id)
+        SpreeSignifyd.set_case(order: order, case_id: case_id)
+      end
+
+      it 'creates or updates the score' do
+        expect {
+          set_case(7)
+        }.to change { order.signifyd_case_id }.from(nil).to(7)
+
+        expect(order.signifyd_case_id).to eq 7
+      end
+
+    end
+
     describe ".approve" do
 
       let(:order) { FactoryGirl.create(:order_ready_to_ship, line_items_count: 1) }
