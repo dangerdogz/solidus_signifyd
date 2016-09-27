@@ -17,6 +17,10 @@ module SpreeSignifyd
     end
   end
 
+  def set_case(order:, case_id:)
+    order.update_attributes!(signifyd_case_id: case_id)
+  end
+
   def approve(order:)
     order.contents.approve(name: self.name)
     order.shipments.each { |shipment| shipment.ready! if shipment.can_ready? }
