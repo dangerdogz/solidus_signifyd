@@ -31,6 +31,11 @@ module SpreeSignifyd
         card.merge!(SpreeSignifyd::BillingAddressSerializer.new(object.bill_address).serializable_object)
       end
 
+      if payment_source.present? && payment_source.instance_of?(SolidusPaypalBraintree::Source)
+        card = BraintreeSourceSerializer.new(payment_source).serializable_object
+        card.merge!(SpreeSignifyd::BillingAddressSerializer.new(object.bill_address).serializable_object)
+      end
+
       card
     end
 
@@ -40,6 +45,8 @@ module SpreeSignifyd
       latest_payment.try!(:source).try(:cc_type) == "paypal"
     end
 
+    # CVV is verified by Braintree
+    # If we make it this far, CVV is verified
     def build_purchase_information
       {
         'browserIpAddress' => object.last_ip_address || "",
@@ -49,7 +56,7 @@ module SpreeSignifyd
         'totalPrice' => object.total.to_f,
         'products' => products,
         'avsResponseCode' => latest_payment.try!(:avs_response) || "",
-        'cvvResponseCode' => latest_payment.try!(:cvv_response_code) || ""
+        'cvvResponseCode' => latest_payment.try!(:cvv_response_code) || "M"
       }
     end
 
